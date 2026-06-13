@@ -2,6 +2,7 @@ const cors = require('cors');
 const express = require('express');
 
 const adminRoutes = require('./routes/admin.routes');
+const adminRoleRoutes = require('./routes/admin-role.routes');
 const authRoutes = require('./routes/auth.routes');
 const helpRoutes = require('./routes/help.routes');
 const jobRoleRoutes = require('./routes/jobRole.routes');
@@ -26,6 +27,7 @@ app.use('/api/job-roles', jobRoleRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admins', adminRoleRoutes);
 app.use('/api/super-admin', superAdminRoutes);
 
 module.exports = app;

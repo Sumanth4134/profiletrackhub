@@ -15,6 +15,20 @@ function normalizeAdRow(ad) {
   };
 }
 
+function normalizeRoleForStorage(role = '') {
+  const normalized = String(role || '').trim().toLowerCase();
+
+  if (normalized === 'recruiter' || normalized === 'admin') {
+    return 'admin';
+  }
+
+  if (normalized === 'super_admin') {
+    return 'super_admin';
+  }
+
+  return '';
+}
+
 exports.getDashboard = async (_req, res) => {
   try {
     const [totals, recentJobs, recentProfiles, adminJobCounts, adminProfileCounts, latestHelpRequests] = await Promise.all([
@@ -93,6 +107,7 @@ exports.getAdmins = async (_req, res) => {
       `SELECT
          a.id,
          a.name,
+         NULL::text AS email,
          a.phone,
          a.role,
          a.status,
@@ -104,9 +119,10 @@ exports.getAdmins = async (_req, res) => {
        FROM admins a
        LEFT JOIN jobs j ON j.admin_id = a.id
        LEFT JOIN candidates c ON c.admin_id = a.id
-       WHERE a.role = 'admin'
        GROUP BY a.id
-       ORDER BY a.created_at DESC`
+       ORDER BY
+         CASE WHEN a.role = 'super_admin' THEN 0 ELSE 1 END,
+         a.created_at DESC`
     );
 
     res.json(result.rows);
@@ -187,6 +203,67 @@ exports.updateAdmin = async (req, res) => {
   } catch (error) {
     console.error('superAdmin.updateAdmin error:', error);
     res.status(500).json({ error: 'Failed to update admin' });
+  }
+};
+
+exports.updateAdminRole = async (req, res) => {
+  try {
+    const targetId = Number.parseInt(req.params.id, 10);
+    const nextRole = normalizeRoleForStorage(req.body.role);
+
+    if (!Number.isInteger(targetId)) {
+      return res.status(400).json({ error: 'Invalid admin id' });
+    }
+
+    if (!nextRole) {
+      return res.status(400).json({ error: 'Allowed roles are recruiter and super_admin' });
+    }
+
+    if (req.user.id === targetId) {
+      return res.status(400).json({ error: 'You cannot change your own role' });
+    }
+
+    const current = await pool.query(
+      `SELECT id, name, phone, role, status, bio, photo_url, created_at
+       FROM admins
+       WHERE id = $1`,
+      [targetId]
+    );
+    const admin = current.rows[0];
+
+    if (!admin) {
+      return res.status(404).json({ error: 'Admin not found' });
+    }
+
+    if (admin.role === nextRole) {
+      return res.json({ admin: sanitizeAdmin(admin) });
+    }
+
+    if (admin.role === 'super_admin' && nextRole === 'admin') {
+      const superAdminCount = await pool.query(
+        `SELECT COUNT(*)::int AS total
+         FROM admins
+         WHERE role = 'super_admin'`
+      );
+
+      if ((superAdminCount.rows[0]?.total || 0) <= 1) {
+        return res.status(400).json({ error: 'You cannot demote the last remaining super admin' });
+      }
+    }
+
+    const result = await pool.query(
+      `UPDATE admins
+       SET role = $1,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $2
+       RETURNING id, name, phone, role, status, bio, photo_url, created_at`,
+      [nextRole, targetId]
+    );
+
+    res.json({ admin: sanitizeAdmin(result.rows[0]) });
+  } catch (error) {
+    console.error('superAdmin.updateAdminRole error:', error);
+    res.status(500).json({ error: 'Failed to update admin role' });
   }
 };
 

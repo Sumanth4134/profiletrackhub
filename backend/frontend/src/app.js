@@ -9,7 +9,7 @@ import Dashboard from './pages/admin/Dashboard';
 import Jobs from './pages/admin/Jobs';
 import ProfileView from './pages/admin/ProfileView';
 import CreateLink from './pages/admin/createLink';
-import Login from "./pages/auth/Login";
+import Login from './pages/auth/Login';
 import CandidateForm from './pages/public/candidateForm';
 import JobsPublic from './pages/public/JobsPublic';
 import Success from './pages/public/Success';

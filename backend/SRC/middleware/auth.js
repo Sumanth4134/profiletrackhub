@@ -19,12 +19,16 @@ async function requireAuth(req, res, next) {
     );
 
     const admin = result.rows[0];
+    const sessionRole = payload?.role;
 
     if (!admin || admin.status !== 'active') {
       return res.status(401).json({ error: 'Session is no longer active' });
     }
 
-    req.user = admin;
+    req.user = {
+      ...admin,
+      role: sessionRole || admin.role
+    };
     next();
   } catch (_error) {
     return res.status(401).json({ error: 'Invalid or expired session' });

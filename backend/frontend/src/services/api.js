@@ -102,6 +102,7 @@ export const getSuperAdminDashboard = () => API.get('/super-admin/dashboard');
 export const getSuperAdminsList = () => API.get('/super-admin/admins');
 export const createAdminAccount = (payload) => API.post('/super-admin/admins', payload);
 export const updateAdminAccount = (id, payload) => API.put(`/super-admin/admins/${id}`, payload);
+export const updateAdminRole = (id, role) => API.patch(`/admins/${id}/role`, { role });
 export const resetAdminPassword = (id) => API.post(`/super-admin/admins/${id}/reset-password`);
 export const getSuperAdminJobs = () => API.get('/super-admin/jobs');
 export const getSuperAdminProfiles = () => API.get('/super-admin/profiles');
