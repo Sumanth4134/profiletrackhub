@@ -3,10 +3,13 @@ import ReactDOM from "react-dom/client";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './index.css';
+import { getApiBaseUrlErrorMessage, hasConfiguredApiBaseUrl, isProductionBuild } from './services/apiConfig';
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 function StartupConfigNotice() {
+  const errorMessage = getApiBaseUrlErrorMessage();
+
   return (
     <div
       style={{
@@ -38,7 +41,7 @@ function StartupConfigNotice() {
           Frontend API configuration is missing
         </h1>
         <p style={{ margin: 0, fontSize: '15px', lineHeight: 1.6, color: '#4b5563' }}>
-          Set <code>REACT_APP_API_BASE_URL</code> in the frontend Vercel project to the backend URL, then redeploy.
+          {errorMessage}
         </p>
         <div
           style={{
@@ -62,10 +65,7 @@ function StartupConfigNotice() {
   );
 }
 
-const configuredBaseUrl = process.env.REACT_APP_API_BASE_URL?.trim();
-const isProductionBuild = process.env.NODE_ENV === 'production';
-
-if (isProductionBuild && !configuredBaseUrl) {
+if (isProductionBuild() && !hasConfiguredApiBaseUrl()) {
   root.render(<StartupConfigNotice />);
 } else {
   import('./app')
