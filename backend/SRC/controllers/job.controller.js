@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const pool = require('../config/db');
+const { getUploadPathFromUrl } = require('../utils/upload-paths');
 
 const DEFAULT_APPLICATION_NAME = 'ProfileTrackHub';
 
@@ -142,7 +143,7 @@ exports.updateJob = async (req, res) => {
     const nextLogoUrl = payload.logoUrl || existing.logo_url;
 
     if (req.file?.filename && existing.logo_url?.startsWith('/uploads/logos/')) {
-      const oldPath = path.join(__dirname, '..', existing.logo_url.replace(/^\//, ''));
+      const oldPath = getUploadPathFromUrl(existing.logo_url);
       if (fs.existsSync(oldPath)) {
         fs.unlinkSync(oldPath);
       }
@@ -193,7 +194,7 @@ exports.deleteJob = async (req, res) => {
 
     const job = existing.rows[0];
     if (job.logo_url?.startsWith('/uploads/logos/')) {
-      const logoPath = path.join(__dirname, '..', job.logo_url.replace(/^\//, ''));
+      const logoPath = getUploadPathFromUrl(job.logo_url);
       if (fs.existsSync(logoPath)) {
         fs.unlinkSync(logoPath);
       }

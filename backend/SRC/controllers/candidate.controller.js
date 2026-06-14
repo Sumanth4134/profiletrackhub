@@ -3,6 +3,7 @@ const path = require('path');
 
 const pool = require('../config/db');
 const { ensureCandidateResumePreview, generateResumePreview, removeResumePreviewFile } = require('../services/resumePreview.service');
+const { getUploadPathFromUrl } = require('../utils/upload-paths');
 
 exports.createCandidate = async (req, res) => {
   try {
@@ -270,7 +271,7 @@ exports.deleteCandidate = async (req, res) => {
     const candidate = result.rows[0];
 
     if (candidate.resume_url) {
-      const resumePath = path.join(__dirname, '..', candidate.resume_url.replace(/^\//, ''));
+      const resumePath = getUploadPathFromUrl(candidate.resume_url);
       if (fs.existsSync(resumePath)) {
         fs.unlinkSync(resumePath);
       }
@@ -279,7 +280,7 @@ exports.deleteCandidate = async (req, res) => {
     removeResumePreviewFile(candidate.resume_preview_url);
 
     if (candidate.extra_file) {
-      const extraFilePath = path.join(__dirname, '..', candidate.extra_file.replace(/^\//, ''));
+      const extraFilePath = getUploadPathFromUrl(candidate.extra_file);
       if (fs.existsSync(extraFilePath)) {
         fs.unlinkSync(extraFilePath);
       }

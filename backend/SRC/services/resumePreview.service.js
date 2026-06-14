@@ -4,9 +4,9 @@ const { execFile } = require('child_process');
 const { promisify } = require('util');
 
 const pool = require('../config/db');
+const { getUploadPathFromUrl } = require('../utils/upload-paths');
 
 const execFileAsync = promisify(execFile);
-const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
 const CONVERTER_SCRIPT = path.join(__dirname, '..', 'utils', 'convert-doc-to-pdf.ps1');
 
 function getAbsoluteUploadPath(relativeUrl = '') {
@@ -14,7 +14,7 @@ function getAbsoluteUploadPath(relativeUrl = '') {
     return '';
   }
 
-  return path.join(__dirname, '..', relativeUrl.replace(/^\//, ''));
+  return getUploadPathFromUrl(relativeUrl);
 }
 
 function isDocResume(filePath = '') {

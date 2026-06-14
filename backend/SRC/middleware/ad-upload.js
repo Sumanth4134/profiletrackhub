@@ -2,7 +2,9 @@ const fs = require('fs');
 const multer = require('multer');
 const path = require('path');
 
-const uploadDir = path.join(__dirname, '..', 'uploads', 'ads');
+const { getUploadPath } = require('../utils/upload-paths');
+
+const uploadDir = getUploadPath('ads');
 
 function ensureUploadDir() {
   if (!fs.existsSync(uploadDir)) {

@@ -5,6 +5,7 @@ const upload = require('../middleware/job-upload');
 
 const router = express.Router();
 
+router.get('/jobs', controller.getPublicJobs);
 router.get('/jobs/public', controller.getPublicJobs);
 router.get('/jobs/:id', controller.getJobById);
 

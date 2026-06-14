@@ -7,3 +7,5 @@ build/
 *.log
 .idea/
 *.iml
+backend/SRC/uploads/
+backend/src/uploads/

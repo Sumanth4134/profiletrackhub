@@ -184,6 +184,38 @@ async function ensureDatabaseSchema() {
   `);
 
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS candidates (
+      id SERIAL PRIMARY KEY,
+      full_name VARCHAR(255),
+      email VARCHAR(255),
+      phone VARCHAR(50),
+      preferred_role VARCHAR(255) DEFAULT '',
+      source VARCHAR(255) DEFAULT '',
+      hybrid TEXT DEFAULT '',
+      relocate VARCHAR(255) DEFAULT '',
+      resume_url TEXT,
+      resume_preview_url TEXT,
+      extra_file TEXT,
+      job_id INTEGER,
+      admin_id INTEGER,
+      job_title VARCHAR(255) DEFAULT '',
+      job_role VARCHAR(255) DEFAULT 'General',
+      job_description TEXT,
+      job_location VARCHAR(255) DEFAULT '',
+      work_preference TEXT DEFAULT '',
+      contract_type VARCHAR(100) DEFAULT '',
+      visa VARCHAR(255) DEFAULT '',
+      linkedin_url TEXT DEFAULT '',
+      skills TEXT DEFAULT '',
+      experience VARCHAR(255) DEFAULT '',
+      location VARCHAR(255) DEFAULT '',
+      status VARCHAR(50) DEFAULT 'New',
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS ads (
       id SERIAL PRIMARY KEY,
       title VARCHAR(255) NOT NULL,

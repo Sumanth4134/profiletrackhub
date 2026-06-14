@@ -5,6 +5,7 @@ const pool = require('../config/db');
 const { NOTIFICATION_TYPES, createNotification } = require('../services/notification.service');
 const { removeResumePreviewFile } = require('../services/resumePreview.service');
 const { generatePassword, hashPassword } = require('../utils/auth');
+const { getUploadPathFromUrl } = require('../utils/upload-paths');
 const { resetAdminPassword, sanitizeAdmin } = require('./auth.controller');
 
 function normalizeAdRow(ad) {
@@ -335,7 +336,7 @@ exports.deleteProfile = async (req, res) => {
     }
 
     if (candidate.resume_url) {
-      const resumePath = path.join(__dirname, '..', candidate.resume_url.replace(/^\//, ''));
+      const resumePath = getUploadPathFromUrl(candidate.resume_url);
       if (fs.existsSync(resumePath)) {
         fs.unlinkSync(resumePath);
       }
@@ -344,7 +345,7 @@ exports.deleteProfile = async (req, res) => {
     removeResumePreviewFile(candidate.resume_preview_url);
 
     if (candidate.extra_file) {
-      const extraFilePath = path.join(__dirname, '..', candidate.extra_file.replace(/^\//, ''));
+      const extraFilePath = getUploadPathFromUrl(candidate.extra_file);
       if (fs.existsSync(extraFilePath)) {
         fs.unlinkSync(extraFilePath);
       }
@@ -451,7 +452,7 @@ exports.deleteAd = async (req, res) => {
     }
 
     if (ad.image_url?.startsWith('/uploads/ads/')) {
-      const imagePath = path.join(__dirname, '..', ad.image_url.replace(/^\//, ''));
+      const imagePath = getUploadPathFromUrl(ad.image_url);
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
       }

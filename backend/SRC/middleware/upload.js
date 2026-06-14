@@ -1,28 +1,31 @@
+const fs = require('fs');
 const multer = require('multer');
 const path = require('path');
 
-// Storage config
+const { getUploadRoot } = require('../utils/upload-paths');
+
+const uploadDirectory = getUploadRoot();
+fs.mkdirSync(uploadDirectory, { recursive: true });
+
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'src/uploads/');
+  destination: (_req, _file, cb) => {
+    cb(null, uploadDirectory);
   },
-  filename: function (req, file, cb) {
+  filename: (_req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
   }
 });
 
-// File filter
-const fileFilter = (req, file, cb) => {
+const fileFilter = (_req, file, cb) => {
   const allowedTypes = ['.pdf', '.doc', '.docx'];
   const ext = path.extname(file.originalname).toLowerCase();
 
   if (allowedTypes.includes(ext)) {
     cb(null, true);
-  } else {
-    cb(new Error('Only PDF/DOC/DOCX files allowed'), false);
+    return;
   }
+
+  cb(new Error('Only PDF/DOC/DOCX files allowed'), false);
 };
 
-const upload = multer({ storage, fileFilter });
-
-module.exports = upload;  // ✅ FIXED
+module.exports = multer({ storage, fileFilter });

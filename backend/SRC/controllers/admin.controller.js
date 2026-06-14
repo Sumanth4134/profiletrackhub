@@ -1,13 +1,12 @@
-const ExcelJS = require('exceljs');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const json2csv = require('json2csv');
 
 const pool = require('../config/db');
 const { NOTIFICATION_TYPES, createNotification } = require('../services/notification.service');
 const { ensureCandidateResumePreview, removeResumePreviewFile } = require('../services/resumePreview.service');
 const { generatePublicSlug } = require('../utils/auth');
+const { getUploadPathFromUrl } = require('../utils/upload-paths');
 
 const DEFAULT_APPLICATION_NAME = 'ProfileTrackHub';
 
@@ -389,7 +388,7 @@ exports.deleteJob = async (req, res) => {
     const job = existing.rows[0];
 
     if (job.logo_url?.startsWith('/uploads/logos/')) {
-      const logoPath = path.join(__dirname, '..', job.logo_url.replace(/^\//, ''));
+      const logoPath = getUploadPathFromUrl(job.logo_url);
       if (fs.existsSync(logoPath)) {
         fs.unlinkSync(logoPath);
       }
@@ -526,7 +525,7 @@ exports.deleteAdminProfile = async (req, res) => {
     const candidate = result.rows[0];
 
     if (candidate.resume_url) {
-      const resumePath = path.join(__dirname, '..', candidate.resume_url.replace(/^\//, ''));
+      const resumePath = getUploadPathFromUrl(candidate.resume_url);
       if (fs.existsSync(resumePath)) {
         fs.unlinkSync(resumePath);
       }
@@ -535,7 +534,7 @@ exports.deleteAdminProfile = async (req, res) => {
     removeResumePreviewFile(candidate.resume_preview_url);
 
     if (candidate.extra_file) {
-      const extraFilePath = path.join(__dirname, '..', candidate.extra_file.replace(/^\//, ''));
+      const extraFilePath = getUploadPathFromUrl(candidate.extra_file);
       if (fs.existsSync(extraFilePath)) {
         fs.unlinkSync(extraFilePath);
       }
@@ -551,6 +550,7 @@ exports.deleteAdminProfile = async (req, res) => {
 
 exports.exportAdminProfilesExcel = async (req, res) => {
   try {
+    const ExcelJS = (await import('exceljs')).default;
     const filterConfig = buildProfileFilters(req.query, req.user.id);
     const result = await pool.query(
       `SELECT c.*
@@ -613,6 +613,7 @@ exports.exportAdminProfilesExcel = async (req, res) => {
 
 exports.exportAdminProfilesCsv = async (req, res) => {
   try {
+    const json2csv = await import('json2csv');
     const filterConfig = buildProfileFilters(req.query, req.user.id);
     const result = await pool.query(
       `SELECT c.*
