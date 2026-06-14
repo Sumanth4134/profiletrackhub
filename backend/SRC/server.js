@@ -59,7 +59,9 @@ async function startServer() {
 async function vercelHandler(req, res) {
   try {
     if (shouldInitializeSchemaForRequest()) {
-      await ensureSchemaReady();
+      await ensureSchemaReady().catch((error) => {
+        console.error('Schema initialization failed on Vercel:', error);
+      });
     }
 
     return app(req, res);
