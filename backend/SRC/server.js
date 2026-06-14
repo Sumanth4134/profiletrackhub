@@ -36,7 +36,11 @@ function ensureSchemaReady() {
 }
 
 function shouldInitializeSchemaForRequest() {
-  return !process.env.VERCEL || process.env.RUN_SCHEMA_ON_STARTUP === 'true';
+  if (!process.env.VERCEL) {
+    return true;
+  }
+
+  return process.env.RUN_SCHEMA_ON_STARTUP !== 'false';
 }
 
 async function startServer() {
