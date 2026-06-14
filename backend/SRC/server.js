@@ -1,5 +1,4 @@
 const express = require('express');
-const path = require('path');
 
 const app = require('./app');
 const { ensureDatabaseSchema } = require('./models/job.model');
@@ -10,19 +9,13 @@ const HOST = process.env.HOST || '0.0.0.0';
 let schemaReady;
 
 app.use('/uploads', express.static(getUploadRoot()));
-app.use(express.static(path.join(__dirname, '../frontend/build')));
 
-app.use((req, res, next) => {
-  if (
-    req.method === 'GET' &&
-    !req.path.startsWith('/api') &&
-    !req.path.startsWith('/uploads') &&
-    !path.extname(req.path)
-  ) {
-    return res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
-  }
-
-  next();
+app.get('/', (_req, res) => {
+  res.status(200).json({
+    success: true,
+    service: 'ProfileTrackHub Backend',
+    status: 'running'
+  });
 });
 
 function ensureSchemaReady() {
