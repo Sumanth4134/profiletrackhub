@@ -20,16 +20,12 @@ export function getApiBaseUrlOrDefault() {
     return configuredBaseUrl.replace(/\/$/, '');
   }
 
-  if (typeof window === 'undefined') {
-    return 'http://localhost:5000';
-  }
-
   if (isProductionBuild()) {
     throw new Error(API_BASE_URL_ERROR);
   }
 
-  if (window.location.port === '3000') {
-    return `${window.location.protocol}//${window.location.hostname}:5000`;
+  if (typeof window === 'undefined') {
+    return '';
   }
 
   return window.location.origin;
